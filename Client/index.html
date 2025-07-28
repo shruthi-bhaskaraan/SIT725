@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Wellness Tracker</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+</head>
+<body class="blue lighten-5">
+
+  <div class="container">
+    <h4 class="center-align blue-text">Daily Wellness Habit Tracker</h4>
+
+    <div class="card">
+      <div class="card-content">
+        <span class="card-title">Plan a Goal</span>
+        <form id="goalForm">
+          <div class="input-field">
+            <input type="text" id="habitName" required>
+            <label for="habitName">Habit Name (e.g., Drink Water)</label>
+          </div>
+          <div class="input-field">
+            <input type="number" id="target" required>
+            <label for="target">Target (e.g., 8 cups, 5 minutes etc.)</label>
+          </div>
+          <button class="btn blue waves-effect waves-light" type="submit">Add Goal</button>
+        </form>
+      </div>
+    </div>
+
+    <ul class="collection" id="habitList"></ul>
+
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+  <script>
+    const form = document.getElementById('goalForm');
+    const habitList = document.getElementById('habitList');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const habit = document.getElementById('habitName').value;
+      const target = document.getElementById('target').value;
+
+      const res = await fetch('/api/habits', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ habit, target })
+      });
+
+      const data = await res.json();
+      addHabitToList(data);
+      form.reset();
+    });
+
+    const addHabitToList = (habitObj) => {
+      const li = document.createElement('li');
+      li.className = 'collection-item';
+      li.innerHTML = `<strong>${habitObj.habit}</strong> - Target: ${habitObj.target}`;
+      habitList.appendChild(li);
+    };
+
+    // Initial load
+    fetch('/api/habits')
+      .then(res => res.json())
+      .then(data => data.forEach(addHabitToList));
+  </script>
+</body>
+</html>
